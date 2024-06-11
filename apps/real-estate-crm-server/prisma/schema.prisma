@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Property {
+  address      String?
+  agent        Agent?              @relation(fields: [agentId], references: [id])
+  agentId      String?
+  appointments Appointment[]
+  assignments  Assignment[]
+  createdAt    DateTime            @default(now())
+  description  String?
+  id           String              @id @default(cuid())
+  price        Float?
+  status       EnumPropertyStatus?
+  title        String?
+  updatedAt    DateTime            @updatedAt
+}
+
+model Appointment {
+  client     Client?   @relation(name: "AppointmentsOnClient", fields: [clientId], references: [id])
+  clientId   String?
+  clients    Client[]  @relation(name: "AppointmentOnClients")
+  createdAt  DateTime  @default(now())
+  date       DateTime?
+  id         String    @id @default(cuid())
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  updatedAt  DateTime  @updatedAt
+}
+
+model Agent {
+  assignment   Assignment?  @relation(name: "AgentsOnAssignment", fields: [assignmentId], references: [id])
+  assignmentId String?
+  assignments  Assignment[] @relation(name: "AgentOnAssignments")
+  createdAt    DateTime     @default(now())
+  email        String?
+  id           String       @id @default(cuid())
+  name         String?
+  phone        String?
+  properties   Property[]
+  updatedAt    DateTime     @updatedAt
+}
+
+model Assignment {
+  agent      Agent?    @relation(name: "AgentOnAssignments", fields: [agentId], references: [id])
+  agentId    String?
+  agents     Agent[]   @relation(name: "AgentsOnAssignment")
+  createdAt  DateTime  @default(now())
+  id         String    @id @default(cuid())
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  updatedAt  DateTime  @updatedAt
+}
+
+model Client {
+  appointment   Appointment?  @relation(name: "AppointmentOnClients", fields: [appointmentId], references: [id])
+  appointmentId String?
+  appointments  Appointment[] @relation(name: "AppointmentsOnClient")
+  createdAt     DateTime      @default(now())
+  email         String?
+  firstName     String?
+  id            String        @id @default(cuid())
+  lastName      String?
+  phone         String?
+  updatedAt     DateTime      @updatedAt
+}
+
+enum EnumPropertyStatus {
+  Option1
+}
